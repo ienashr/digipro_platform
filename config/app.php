@@ -59,7 +59,7 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
-    'file_upload_endpoint' => env('FILE_UPLOAD_ENDPOINT', 'http:/localhost'),
+    'file_upload_endpoint' => env('FILE_UPLOAD_ENDPOINT', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------

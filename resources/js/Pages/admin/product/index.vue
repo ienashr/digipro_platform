@@ -23,6 +23,8 @@ import VEdit from '@/components/src/icons/VEdit.vue';
 import VTrash from '@/components/src/icons/VTrash.vue';
 import VFilter from './Filter.vue';
 import VModalForm from './ModalForm.vue';
+import { Inertia } from "@inertiajs/inertia";
+
 
 const query = ref([])
 const searchFilter = ref("");
@@ -56,7 +58,7 @@ const updateAction = ref(false)
 const itemSelected = ref({})
 const openAlert = ref(false)
 const openModalForm = ref(false)
-const heads = ["Image", "Name", "Description", "Price", "Content", ""]
+const heads = ["Image", "Name", "Category", "Description", "Price", "Content", ""]
 const isLoading = ref(true)
 
 const props = defineProps({
@@ -211,9 +213,9 @@ onMounted(() => {
                 <td class="px-4 whitespace-nowrap h-16">
                     <img class="w-32 h-32 py-2" :src="data.preview_image"/>
                 </td>
+                <td class="px-4 whitespace-nowrap h-16">  <p>{{ data.name }}</p>   </td>
                 <td class="px-4 whitespace-nowrap h-16"> 
-                    <p>{{ data.name }}</p>
-                    <p>Category: {{ data.category_name }}</p>
+                    <p>{{ data.category_name }}</p>
                 </td>
                 <td class="px-4 whitespace-nowrap h-16"> {{ data.description }} </td>
                 <td class="px-4 whitespace-nowrap h-16"> Rp{{ data.price_formatted }} </td>
@@ -248,6 +250,10 @@ onMounted(() => {
     <VAlert :open-dialog="openAlert" @closeAlert="closeAlert" @submitAlert="deleteHandle" type="danger"
         :headerLabel="alertData.headerLabel" :content-label="alertData.contentLabel" :close-label="alertData.closeLabel"
         :submit-label="alertData.submitLabel" />
-    <VModalForm :data="itemSelected" :update-action="updateAction" :open-dialog="openModalForm" @close="closeModalForm"
-        @successSubmit="successSubmit" :additional="additional" />
+    <VModalForm :data="itemSelected" 
+    :update-action="updateAction" 
+    :open-dialog="openModalForm"
+    @close="closeModalForm"
+    @successSubmit="successSubmit" 
+    :additional="additional" />
 </template>

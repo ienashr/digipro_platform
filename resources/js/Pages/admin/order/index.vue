@@ -1,6 +1,6 @@
 <script>
 export default {
-    layout: AppLayout
+    layout: AppLayout,
 }
 </script>
 <script setup>
@@ -23,6 +23,8 @@ import VEdit from '@/components/src/icons/VEdit.vue';
 import VTrash from '@/components/src/icons/VTrash.vue';
 import VFilter from './Filter.vue';
 import VModalForm from './ModalForm.vue';
+import { Inertia } from "@inertiajs/inertia";
+
 
 const query = ref([])
 const searchFilter = ref("");
@@ -56,7 +58,7 @@ const updateAction = ref(false)
 const itemSelected = ref({})
 const openAlert = ref(false)
 const openModalForm = ref(false)
-const heads = ["Email", "Status", "Payment", "Total Price", ""]
+const heads = ["id", "Customer", "Status", "Payment", "Total Price", ""]
 const isLoading = ref(true)
 
 const props = defineProps({
@@ -168,6 +170,8 @@ const deleteHandle = async () => {
     })
 };
 
+
+
 onMounted(() => {
     getData(1);
 });
@@ -189,7 +193,15 @@ onMounted(() => {
             <div class="mt-3 sm:mt-0 flex space-x-2 sm:justify-between justify-end">
                 <!-- Filter -->
                 <VFilter @search="searchHandle" @apply="applyFilter" @clear="clearFilter" :additional="additional"/>
-                <VButton label="Add Order" type="primary" @click="handleAddModalForm" class="mt-auto" />
+
+                  <!--  <VButton
+                    label="Create Order"
+                    type="primary"
+                    @click="handleCreatePage"
+                    class="mt-auto"
+                />-->
+
+            <VButton label="Add Order" type="primary" @click="handleAddModalForm" class="mt-auto" /> 
             </div>
         </header>
 
@@ -208,13 +220,13 @@ onMounted(() => {
                 </td>
             </tr>
             <tr v-for="(data, index) in query" :key="index" v-else>
+                <td class="px-4 whitespace-nowrap h-16"><p>{{ data.id }}</p> </td>
                 <td class="px-4 whitespace-nowrap h-16"> 
-                    <p>{{ data.id }}</p>
-                    <p>Customer: {{ data.customer_email }}</p>
+                    <p>{{ data.customer_name }}</p>
                 </td>
                 <td class="px-4 whitespace-nowrap h-16"> {{ data.status }} </td>
-                <td class="px-4 whitespace-nowrap h-16"> Rp{{ data.total_price }}</td>
-                <td class="px-4 whitespace-nowrap h-16">{{ data.payment_status }}</td>
+                <td class="px-4 whitespace-nowrap h-16"> {{ data.payment_status }}</td>
+                <td class="px-4 whitespace-nowrap h-16">Rp{{ data.price }}</td>
                 <td class="px-4 whitespace-nowrap h-16 text-right">
                     <VDropdownEditMenu class="relative inline-flex r-0" :align="'right'"
                         :last="index === query.length - 1 ? true : false">

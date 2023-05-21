@@ -1,7 +1,7 @@
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
-import { bool, object } from "vue-types";
+import { ref, onMounted} from "vue";
+import { bool, object, string } from "vue-types";
 import { notify } from "notiwind";
 import VDialog from '@/components/VDialog/index.vue';
 import VButton from '@/components/VButton/index.vue';
@@ -12,8 +12,12 @@ import VSelect from '@/components/VSelect/index.vue';
 const props = defineProps({
     openDialog: bool(),
     updateAction: bool().def(false),
-    data: object().def({})
+    data: object().def({}),
+    additional: object().def({}),
+
 })
+
+const paymentOption = ["paid", "pending", "failed"];
 
 const emit = defineEmits(['close', 'successSubmit'])
 
@@ -115,6 +119,7 @@ const create = async () => {
             }
         }).finally(() => isLoading.value = false)
 }
+
 </script>
 
 <template>
@@ -129,30 +134,43 @@ const create = async () => {
             </button>
         </template>
         <template v-slot:content>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="col-span-2">
+            <div class="flex flex-col gap-4 p-4">
+
+            <!-- CUSTOMER EMAIL -->
+            <div class="col-span-2">
                     <VInput placeholder="Insert Email" label="Email" :required="true" v-model="form.customer_email" :errorMessage="formError.customer_email"
                         @update:modelValue="formError.customer_email = ''" />
                 </div>
+
                 <div class="col-span-2">
-                    <VInput placeholder="Insert Status" label="Status" :required="true" v-model="form.status" :errorMessage="formError.status"
-                        @update:modelValue="formError.status = ''" />
+                    <VInput placeholder="Insert Customer Id" label="Customer Id" :required="true" v-model="form.customer_id" :errorMessage="formError.customer_id"
+                        @update:modelValue="formError.customer_id= ''" />
                 </div>
-                <div class="col-span-2">
-                    <VInput placeholder="Insert Payment Status" label="Payment Status" :required="true" v-model="form.payment_status" :errorMessage="formError.payment_status"
-                        @update:modelValue="formError.payment_status= ''" />
-                </div>
-                <div class="col-span-2">
+
+            <!--STATUS-->
+            <VSelect
+                placeholder="Status"
+                label="Status"
+                :required="true"
+                v-model="status"
+                :options="paymentOption"
+            />
+
+            <!-- PAYMENT STATUS -->
+            <VSelect
+                placeholder="Payment Status"
+                label="Payment Status"
+                :required="true"
+                v-model="form.payment_status"
+                :options="paymentOption"
+            />
+          
+            <div class="col-span-2">
                     <VInput placeholder="Insert Total Price" label="Total Price" :required="true" v-model="form.total_price" :errorMessage="formError.total_price"
                         @update:modelValue="formError.total_price= ''" />
                 </div>
-                <div class="col-span-2">
-                    <VInput placeholder="Insert Total Price" label="Total Price" :required="true" v-model="form.customer_id" :errorMessage="formError.customer_id"
-                        @update:modelValue="formError.customer_id= ''" />
-                </div>
-              
-        
-            </div>
+
+        </div>
         </template>
         <template v-slot:footer>
             <div class="flex flex-wrap justify-end space-x-2">

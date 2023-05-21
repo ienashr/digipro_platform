@@ -7,7 +7,7 @@ import VFilter from '@/components/VFilter/index.vue';
 
 const filter = ref({})
 const searchValue = ref("")
-const filterCategory = ref()
+const filterCustomer = ref()
 
 const props = defineProps({
     additional: any()
@@ -19,7 +19,7 @@ const applyFilter = () => {
 
 const clearFilter = () => {
     filter.value = ref({})
-    filterCategory.value.clearSelected()
+    filterCustomer.value.clearSelected()
     emit('clear', filter.value)
 }
 

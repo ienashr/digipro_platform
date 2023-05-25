@@ -24,6 +24,7 @@ import VTrash from '@/components/src/icons/VTrash.vue';
 import VFilter from './Filter.vue';
 import VModalForm from './ModalForm.vue';
 import { Inertia } from "@inertiajs/inertia";
+import VOrderItem from './addOrderItem.vue'
 
 
 const query = ref([])
@@ -58,122 +59,76 @@ const updateAction = ref(false)
 const itemSelected = ref({})
 const openAlert = ref(false)
 const openModalForm = ref(false)
-const heads = ["id", "Customer", "Status", "Payment", "Total Price", ""]
-const isLoading = ref(true)
+const heads = ["Name", "Quantity", "Price", "Total Price", ""]
+const orderItemLoading = ref(true)
+const changeLoading = ref(true)
 
 const props = defineProps({
     title: string(),
     additional: object(),
 })
 
-const getData = debounce(async (page) => {
-    axios.get(route('order.getdata'), {
-        params: {
-            page: page,
-            search: searchFilter.value,
-            filter_customer: filter.value.filter_customer,
-        }
-    }).then((res) => {
-        query.value = res.data.data
-        pagination.value = res.data.meta.pagination
-    }).catch((res) => {
-        notify({
-            type: "error",
-            group: "top",
-            text: res.response.data.message
-        }, 2500)
-    }).finally(() => isLoading.value = false)
+const getOrderItemData = debounce(async () => {
+   axios.get(route('order.getorderitemdata'))
+   .then((res) => {
+       query.value = res.data.data
+       grandTotal.value = res.data.grand_total
+   }).catch((res) => {
+       notify({
+           type: "error",
+           group: "top",
+           text: res.response.data.message
+       }, 2500)
+   }).finally(() => orderItemLoading.value = false)
 }, 500);
-
-const nextPaginate = () => {
-    pagination.value.current_page += 1
-    isLoading.value = true
-    getData(pagination.value.current_page)
-}
-
-const previousPaginate = () => {
-    pagination.value.current_page -= 1
-    isLoading.value = true
-    getData(pagination.value.current_page)
-}
-
-const searchHandle = (search) => {
-    searchFilter.value = search
-    isLoading.value = true
-    getData(1)
-};
-
-const applyFilter = (data) => {
-    filter.value = data
-    isLoading.value = true
-    getData(1)
-}
-
-const clearFilter = (data) => {
-    filter.value = data
-    isLoading.value = true
-    getData(1)
-}
-
-const handleAddModalForm = () => {
-    updateAction.value = false
-    openModalForm.value = true
-}
-
-const handleEditModal = (data) => {
-    updateAction.value = true
-    itemSelected.value = data
-    openModalForm.value = true
-}
-
 const successSubmit = () => {
-    isLoading.value = true
-    getData(pagination.value.current_page)
+   orderItemLoading.value = true
+   getOrderItemData()
 }
-
+const handleEditQty = (data) => {
+   itemSelected.value = data
+   openModalForm.value = true
+}
 const closeModalForm = () => {
-    itemSelected.value = ref({})
-    openModalForm.value = false
+   itemSelected.value = ref({})
+   openModalForm.value = false
 }
-
 const alertDelete = (data) => {
-    itemSelected.value = data
-    openAlert.value = true
-    alertData.headerLabel = 'Are you sure to delete this?'
-    alertData.contentLabel = "You won't be able to revert this!"
-    alertData.closeLabel = 'Cancel'
-    alertData.submitLabel = 'Delete'
+   itemSelected.value = data
+   openAlert.value = true
+   alertData.headerLabel = 'Are you sure to delete this?'
+   alertData.contentLabel = "You won't be able to revert this!"
+   alertData.closeLabel = 'Cancel'
+   alertData.submitLabel = 'Delete'
 }
-
 const closeAlert = () => {
-    itemSelected.value = ref({})
-    openAlert.value = false
+   itemSelected.value = ref({})
+   openAlert.value = false
 }
-
-const deleteHandle = async () => {
-    axios.delete(route('order.delete', { 'id': itemSelected.value.id })
-    ).then((res) => {
-        notify({
-            type: "success",
-            group: "top",
-            text: res.data.meta.message
-        }, 2500)
-        openAlert.value = false
-        isLoading.value = true
-        getData(pagination.value.current_page)
-    }).catch((res) => {
-        notify({
-            type: "error",
-            group: "top",
-            text: res.response.data.message
-        }, 2500)
-    })
+const deleteProductFromOrderItem = async () => {
+   axios.delete(route('order.deletefromorderitem', { 'id': itemSelected.value.id })
+   ).then((res) => {
+       notify({
+           type: "success",
+           group: "top",
+           text: res.data.meta.message
+       }, 2500)
+       openAlert.value = false
+       orderItemLoading.value = true
+       getOrderItemData()
+   }).catch((res) => {
+       notify({
+           type: "error",
+           group: "top",
+           text: res.response.data.message
+       }, 2500)
+   })
 };
 
 
 
 onMounted(() => {
-    getData(1);
+    getOrderItemData();
 });
 </script>
 
@@ -185,11 +140,15 @@ onMounted(() => {
         <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">Order</h1>
     </div>
     <div class="bg-white shadow-lg rounded-sm border border-slate-200"
-        :class="isLoading && 'min-h-[40vh] sm:min-h-[50vh]'">
+        :class="orderItemLoading && 'min-h-[40vh] sm:min-h-[50vh]'">
+        <VOrderItem :additional="additional" @successSubmit="successSubmit"/>
+
         <header class="block justify-between items-center sm:flex py-6 px-4">
             <h2 class="font-semibold text-slate-800">
                 All Orders <span class="text-slate-400 !font-medium ml">{{ pagination.total }}</span>
             </h2>
+
+
             <div class="mt-3 sm:mt-0 flex space-x-2 sm:justify-between justify-end">
                 <!-- Filter -->
                 <VFilter @search="searchHandle" @apply="applyFilter" @clear="clearFilter" :additional="additional"/>
@@ -199,19 +158,23 @@ onMounted(() => {
                     type="primary"
                     @click="handleCreatePage"
                     class="mt-auto"
-                />-->
+                />
 
-            <VButton label="Add Order" type="primary" @click="handleAddModalForm" class="mt-auto" /> 
+            <VButton label="Add Order" type="primary" @click="handleAddModalForm" class="mt-auto" /> -->
             </div>
         </header>
 
-        <VDataTable :heads="heads" :isLoading="isLoading">
-            <tr v-if="isLoading">
+        <VDataTable :heads="heads" :isLoading="orderItemLoading">
+
+            <tr v-if="orderItemLoading">
                 <td class="h-[100%] overflow-hidden my-2" :colspan="heads.length">
                     <VLoading />
                 </td>
             </tr>
-            <tr v-else-if="query.length === 0 && !isLoading">
+            
+            
+            <tr v-else-if="query.length === 0 && !orderItemLoading">
+
                 <td class="overflow-hidden my-2" :colspan="heads.length">
                     <div class="flex items-center flex-col w-full my-32">
                         <VEmpty />
@@ -220,13 +183,10 @@ onMounted(() => {
                 </td>
             </tr>
             <tr v-for="(data, index) in query" :key="index" v-else>
-                <td class="px-4 whitespace-nowrap h-16"><p>{{ data.id }}</p> </td>
-                <td class="px-4 whitespace-nowrap h-16"> 
-                    <p>{{ data.customer_name }}</p>
-                </td>
-                <td class="px-4 whitespace-nowrap h-16"> {{ data.status }} </td>
-                <td class="px-4 whitespace-nowrap h-16"> {{ data.payment_status }}</td>
-                <td class="px-4 whitespace-nowrap h-16">Rp{{ data.price }}</td>
+                <td class="px-4 whitespace-nowrap h-16"> {{ data.product.name }} </td>
+                <td class="px-4 whitespace-nowrap h-16"> {{ data.quantity }}</td>
+                <td class="px-4 whitespace-nowrap h-16">Rp {{ data.product.price_formatted }}</td>
+                <td class="px-4 whitespace-nowrap h-16">Rp{{ data.total_price }}</td>
                 <td class="px-4 whitespace-nowrap h-16 text-right">
                     <VDropdownEditMenu class="relative inline-flex r-0" :align="'right'"
                         :last="index === query.length - 1 ? true : false">

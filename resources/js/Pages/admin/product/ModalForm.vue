@@ -146,7 +146,7 @@ const create = async (fd) => {
             </button>
         </template>
         <template v-slot:content>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-3 w-full">
                 <div class="col-span-2">
                     <VInput placeholder="Insert Name" label="Name" :required="true" v-model="form.name" :errorMessage="formError.name"
                         @update:modelValue="formError.name = ''" />

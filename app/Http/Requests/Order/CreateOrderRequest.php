@@ -24,7 +24,6 @@ class CreateOrderRequest extends FormRequest
         return [
             'customer_email' => 'required|string',
             'status' => 'required|string',
-            'payment_status' => 'required|string',
             'customer_id' => 'required|exists:customers,id',
             'total_price' => 'required|numeric',
         ];

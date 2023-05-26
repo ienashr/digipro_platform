@@ -100,7 +100,7 @@ class OrderService
 
     public function createData($request)
     {
-        $inputs = $request->only(['customer_email', 'status', 'total_price', 'payment_status', 'customer_id']);
+        $inputs = $request->only(['customer_email', 'status', 'total_price', 'customer_id']);
         $order = Order::create($inputs);
 
         return $order;
@@ -118,7 +118,7 @@ class OrderService
     {
         $order = Order::findOrFail($id);
         
-        $inputs = $request->only(['customer_email', 'status', 'total_price', 'payment_status', 'customer_id']);
+        $inputs = $request->only(['customer_email', 'status', 'total_price', 'customer_id']);
         
         $order->update($inputs);
 

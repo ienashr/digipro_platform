@@ -30,7 +30,6 @@ class OrderListResource extends ResourceCollection
             'id' => $data->id,
             'email' => $data->customer_email,
             'status' => $data->status,
-            'payment_status' => $data->payment_status,
             'price' => (int)$data->total_price,
             'price_formatted' => number_format($data->total_price, 2, ',', '.'),
             'customer_id' => $data->customer_id,
